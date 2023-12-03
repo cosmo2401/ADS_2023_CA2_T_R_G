@@ -19,7 +19,7 @@ bool valdiateXML(string data) {
 		if (data[i] == '<') {
 			i++;
 
-			if (data[i] == '/') { //Check the closing tag name and compare if it is valid
+			if (data[i] == '/') { // Check the closing tag name and compare if it is valid
 				i++;
 
 				string tagName;
@@ -36,7 +36,7 @@ bool valdiateXML(string data) {
 				
 				xmlStack->pop();
 			}
-			else { //´Check the opening tag name and push it on the stack
+			else { // Check the opening tag name and push it on the stack
 				string tagName;
 
 				for(; data[i] != '>';i++) tagName += data[i];
@@ -93,6 +93,7 @@ void calcMemoryForFolder(TreeIterator<T> iter)
 
 int main()
 {
+	// Step 1 Read in a XML file
 	string xml = R"(<dir>
         <name> ADS_Single_LinkedList_Exercises</name>
         <dir>
@@ -142,21 +143,22 @@ int main()
         </dir>
         </dir>)";
 
-	Stack<string>* newStack = new Stack<string>;
-
-	newStack->push("testing");
-
-	cout << newStack->top() << endl;
-	cout << "Length of the xml string " << xml.length() << endl;
-
-	if (newStack->top() == "test") {
-		cout << " its the same";
-	}
-
-	// Testing purposes
+	// Step 2 validate the XML File
 	if (valdiateXML(xml)) {
 		cout << "This is a valid xml" << endl;
 	}
+
+	// Step 3 Put the XML file structure into a tree
+
+	// Step 4 Determine the number of files and folders in a given dir
+
+	// Step 5 Determine the memory used of a given dir
+
+	// Step 6 Remove empty folder
+
+	// Step 7 Find a particular folder given a filename and generate a path
+
+	// Step 8 Display a given dir
 
 	//std::cout << xml;
 }
