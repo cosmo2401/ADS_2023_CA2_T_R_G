@@ -8,7 +8,7 @@ public:
 	T data;
 	Tree<T>* parent;
 	DList<Tree<T>*>* children;
-	Tree(T item);
+	Tree(T data);
 	int count();
 	T getData();
 };
@@ -18,9 +18,9 @@ T Tree<T>::getData()
 	return data;
 }
 template <class T>
-Tree<T>::Tree(T item)
+Tree<T>::Tree(T data)
 {
-	data = item;
+	this->data = data;
 	parent = nullptr;
 	children = new DList<Tree<T>*>();
 }
