@@ -93,7 +93,8 @@ Tree<xmlData>* createTree(string data) {
 						}
 						else if (tagName == "length") {
 							for (; data[i] != '<'; i++) content += data[i];
-							newXML.length = stoi(content);
+							int temp = stoi(content);
+							newXML.length = temp;
 						}
 						else if (tagName == "type") {
 							for (; data[i] != '<'; i++) content += data[i];
@@ -130,42 +131,77 @@ Tree<xmlData>* createTree(string data) {
 	return tree;
 }
 
-void nrOfItems() {
-}
-
-/*
 template <class T>
-void calcMemoryForFolder(TreeIterator<T> iter)
-{
-	queue<Tree<T>*> q;
-	q.push(&tree);
-	while (!q.empty()) {
-		cout << q.front()->getData() << " ";
-		DListIterator<Tree<T>*> iter = q.front()->children->getIterator();
-		while (iter.isValid()) {
-			q.push(iter.item());
-			iter.advance();
-		}
-		q.pop();
-	}
-}
-*/
-/*
-template <class T>
-void printDFS(TreeIterator<T> iter) //Pre order traversel
-{
+int nrOfFolders(TreeIterator<T> iter) {
+	TreeIterator<T> iter1(iter);
 	DListIterator<Tree<T>*> iter = iter;
 
-	cout << iter.item() << " ";
+	int c = 1;
+
+	while (iter1.childValid()) {
+		TreeIterator<T> iter2(iter1);
+		iter2.down();
+		nrOfFolders(iter2);
+		iter1.childForth();
+	}
+
+	return c;
+}
+
+template <class T>
+int countFolders(TreeIterator<T> iter)
+{
+	int c = 0;
+	if (iter.item().nameType == "dir") c++;
+
 	while (iter.childValid()) {
 		TreeIterator<T> iter2(iter);
 		iter2.down();
-		printDFS(iter2);
+		c += countFolders(iter2);
+		iter.childForth();
+	}
+	return c;
+}
+template <class T>
+int countFiles(TreeIterator<T> iter)
+{
+	int c = 0;
+	if (iter.item().nameType == "file") c++;
+
+	while (iter.childValid()) {
+		TreeIterator<T> iter2(iter);
+		iter2.down();
+		c += countFiles(iter2);
+		iter.childForth();
+	}
+	return c;
+}
+
+template <class T>
+int calcMemoryUsed(TreeIterator<T> iter) {
+
+	int c = 0;
+	if (iter.item().nameType == "file") c += iter.item().length;
+
+	while (iter.childValid()) {
+		TreeIterator<T> iter2(iter);
+		iter2.down();
+		c += calcMemoryUsed(iter2);
+		iter.childForth();
+	}
+	return c;
+}
+
+template <class T>
+void pruneTree(TreeIterator<T> iter) {
+	while (iter.childValid()) {
+		TreeIterator<T> iter2(iter);
+		iter2.down();
+		pruneTree(iter2);
+		if (iter.item().nameType == "dir") iter.removeChild();// Remove current node here 
 		iter.childForth();
 	}
 }
-*/
-
 template <class T>
 void displayTree(TreeIterator<T> iter, string indent)
 {
@@ -243,9 +279,9 @@ int main()
         </dir>
         </dir>)";
 
-	string x = "<dir><name>test</name></dir>";
 
 	// Step 2 validate the XML File
+
 	if (valdiateXML(xml)) {
 		cout << "This is a valid xml" << endl;
 	}
@@ -260,7 +296,13 @@ int main()
 
 	// Step 4 Determine the number of files and folders in a given dir
 
+	treeIter.root();
+	cout << "Number of Folders " << countFolders(treeIter) << endl;
+	cout << "Number of Folders " << countFiles(treeIter) << endl;
+
 	// Step 5 Determine the memory used of a given dir
+
+	cout << "The files in this folder are using a total of " << calcMemoryUsed(treeIter) << " b" << endl;
 
 	// Step 6 Remove empty folder
 
