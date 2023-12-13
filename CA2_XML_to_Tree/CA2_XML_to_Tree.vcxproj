@@ -135,6 +135,7 @@
     <ClInclude Include="DListNode.h" />
     <ClInclude Include="Stack.h" />
     <ClInclude Include="Tree.h" />
+    <ClInclude Include="TreeFunctions.h" />
     <ClInclude Include="TreeIterator.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
