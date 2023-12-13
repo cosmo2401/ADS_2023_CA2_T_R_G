@@ -3,6 +3,10 @@
 
 #include <iostream>
 #include <string>
+#include <sstream>
+#include <fstream>
+#include <queue>
+
 #include "Stack.h"
 #include "Tree.h"
 #include "TreeIterator.h"
@@ -16,6 +20,19 @@ struct xmlData
 	int length = 0;
 	string type = "";
 };
+
+string readFile(string path) {
+	ifstream file(path);
+
+	if (!file.is_open()) cout << "Error opening file: " << path << endl;
+
+	stringstream stream;
+	stream << file.rdbuf();
+
+	file.close();
+
+	return stream.str();
+}
 
 bool valdiateXML(string data) {
 	Stack<string>* xmlStack = new Stack<string>;
@@ -55,7 +72,10 @@ bool valdiateXML(string data) {
 Tree<xmlData>* createTree(string data) {
 	xmlData root;
 
-	int i = 4;
+
+
+	int i = data.find("<name>");
+	i += 6;
 
 	for (; data[i] != '<'; i++) root.name += data[i];
 
@@ -67,7 +87,6 @@ Tree<xmlData>* createTree(string data) {
 	while (i < data.length()) {
 		if (data[i] == '<') { // See if current char is a opening tag
 			i++;
-
 			if (data[i] != '/') { // Check the closing tag name and compare if it is valid
 				string tagName;
 
@@ -125,6 +144,9 @@ Tree<xmlData>* createTree(string data) {
 					treeIter.down();
 				}
 			}
+			else if (data[i + 1] == 'd' && data[i + 2] == 'i' && data[i + 3] == 'r') {
+				treeIter.up();
+			}
 		}
 		else i++;
 	}
@@ -177,19 +199,24 @@ int countFiles(TreeIterator<T> iter)
 	return c;
 }
 
-template <class T>
-int calcMemoryUsed(TreeIterator<T> iter) {
+int calcMemoryUsed(Tree<xmlData> tree)
+{
+	queue<Tree<xmlData>> queue;
+	queue.push(tree);
+	int size = 0;
+	while (!queue.empty())
+	{
+		DListIterator<Tree<xmlData>*> iter = queue.front().children->getIterator();
+		while (iter.isValid())
+		{
+			queue.push(*iter.item());
+			iter.advance();
+		}
 
-	int c = 0;
-	if (iter.item().nameType == "file") c += iter.item().length;
-
-	while (iter.childValid()) {
-		TreeIterator<T> iter2(iter);
-		iter2.down();
-		c += calcMemoryUsed(iter2);
-		iter.childForth();
+		size += queue.front().data.length;
+		queue.pop();
 	}
-	return c;
+	return size;
 }
 
 template <class T>
@@ -198,10 +225,11 @@ void pruneTree(TreeIterator<T> iter) {
 		TreeIterator<T> iter2(iter);
 		iter2.down();
 		pruneTree(iter2);
-		if (iter.item().nameType == "dir") iter.removeChild();// Remove current node here 
-		iter.childForth();
+		if (iter2.item().nameType == "dir") iter.removeChild();// Remove current node here
+		//iter.childForth();
 	}
 }
+
 template <class T>
 void displayTree(TreeIterator<T> iter, string indent)
 {
@@ -229,56 +257,10 @@ void displayTree(TreeIterator<T> iter, string indent)
 int main()
 {
 	// Step 1 Read in a XML file
-	string xml = R"(
-		<dir>
-        <name> ADS_Single_LinkedList_Exercises</name>
-        <dir>
-        <name>.git</name>
-        <file>
-        <name>config</name>
-        <length>353 b</length>
-        <type>config</type>
-        </file>
-        <file>
-        <name>description</name>
-        <length>73 b</length>
-        <type>description</type>
-        </file>
-        <file>
-        <name>HEAD</name>
-        <length>23 b</length>
-        <type>HEAD</type>
-        </file>
-        </dir>
-        <dir>
-        <name>.vs</name>
-        <dir>
-        <name>ADS_Single_LinkedList_Exercises</name>
-        <dir>
-        <name>v17</name>
-        </dir>
-        </dir>
-        </dir>
-        <dir>
-        <name>Debug</name>
-        <file>
-        <name>SinglyLinkedList.pdb</name>
-        <length>978944 b</length>
-        <type>pdb</type>
-        </file>
-        <file>
-        <name>TestSinglyLinkedList.exp</name>
-        <length>41528 b</length>
-        <type>exp</type>
-        </file>
-        <file>
-        <name>TestSinglyLinkedList.pdb</name>
-        <length>1945600 b</length>
-        <type>pdb</type>
-        </file>
-        </dir>
-        </dir>)";
 
+	string xml = readFile("../xml.xml");
+
+	//cout << xml;
 
 	// Step 2 validate the XML File
 
@@ -298,15 +280,19 @@ int main()
 
 	treeIter.root();
 	cout << "Number of Folders " << countFolders(treeIter) << endl;
-	cout << "Number of Folders " << countFiles(treeIter) << endl;
+	cout << "Number of Files " << countFiles(treeIter) << endl;
 
 	// Step 5 Determine the memory used of a given dir
 
-	cout << "The files in this folder are using a total of " << calcMemoryUsed(treeIter) << " b" << endl;
+	cout << "The files in this folder are using a total of " << calcMemoryUsed(*xmlTree) << " b" << endl;
 
 	// Step 6 Remove empty folder
 
+	//pruneTree(treeIter);
+
 	// Step 7 Find a particular folder given a filename and generate a path
+
+
 
 	// Step 8 Display a given dir
 
